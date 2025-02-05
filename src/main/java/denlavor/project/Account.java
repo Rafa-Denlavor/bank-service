@@ -1,13 +1,13 @@
 package denlavor.project;
 
 import denlavor.project.utilities.Utils;
-import lombok.Getter;
-import lombok.Setter;
+//import lombok.Getter;
+//import lombok.Setter;
 
 import java.util.Random;
 
-@Getter
-@Setter
+//@Getter
+//@Setter
 public class Account {
     private static int accountCounter = 1;
 
@@ -15,6 +15,7 @@ public class Account {
     private int agency = 760;
     private int accountNumber;
     private Double balance = 0.0;
+    private Double savingsBalance = 0.0;
 
     public Account(Person person) {
         this.person = person;
@@ -24,10 +25,12 @@ public class Account {
     }
 
     public String getAllData() {
-        return "\nPessoa: " + this.getPerson() +
+        return
                 "\nAgência: " + this.getAgency() +
                 "\nConta: " + this.getAccountNumber() +
-                "\nSaldo: " + Utils.doubleToString(getBalance());
+                "\nSaldo da conta corrente: " + Utils.doubleToString(getBalance()) +
+                "\nSaldo da poupança: " + this.getSavingsBalance() +
+                this.getPerson().getAllData();
 //                "\nChave pix: " + this.getPixKey() +
 //                "\nPix: " + this.getPixValue();
     }
@@ -91,6 +94,14 @@ public class Account {
         this.balance = balance;
     }
 
+    public Double getSavingsBalance() {
+        return this.savingsBalance;
+    }
+
+    public void setSavingsBalance(Double savingsBalance) {
+        this.savingsBalance = savingsBalance;
+    }
+
     public int getAccountNumber() {
         return this.accountNumber;
     }
@@ -106,4 +117,5 @@ public class Account {
     public void setPerson(Person person) {
         this.person = person;
     }
+
 }

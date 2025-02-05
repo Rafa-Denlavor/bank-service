@@ -3,7 +3,7 @@ package denlavor.project;
 import denlavor.project.utilities.Utils;
 
 import java.util.ArrayList;
-import java.util.Collection;
+import java.util.InputMismatchException;
 import java.util.Scanner;
 
 public class BankBranch {
@@ -20,25 +20,22 @@ public class BankBranch {
     static Account accountTest2 = new Account(personTest2);
 
     public static void operations() {
-
         // TO DO: Remover após as validações de todos os métodos
         accounts.add(accountTest);
         accounts.add(accountTest2);
-
-        System.out.println(accountTest.getAccountNumber() + " + " + accountTest2.getAccountNumber() + '\n');
 
         System.out.println("\n------------------------------------------------------");
         System.out.println("---------------- Agência Denlavor Tech ---------------");
         System.out.println("------------------------------------------------------");
         System.out.println("|**** Selecione uma operação que deseja realizar ****|");
         System.out.println("------------------------------------------------------");
-        System.out.println("|               Opção 1 - Criar conta                |");
-        System.out.println("|               Opção 2 - Depositar                  |");
-        System.out.println("|               Opção 3 - Sacar                      |");
-        System.out.println("|               Opção 4 - Transferir                 |");
-        System.out.println("|               Opção 5 - Listar contas              |");
-        System.out.println("|               Opção 6 - Deletar conta              |");
-        System.out.println("|               Opção 7 - Sair                       |");
+        System.out.println("|                   [1] Criar conta                  |");
+        System.out.println("|                   [2] Depositar                    |");
+        System.out.println("|                   [3] Sacar                        |");
+        System.out.println("|                   [4] Transferir                   |");
+        System.out.println("|                   [5] Listar contas                |");
+        System.out.println("|                   [6] Deletar conta                |");
+        System.out.println("|                   [7] Sair                         |");
         System.out.println("------------------------------------------------------");
 
         int operation = input.nextInt();;
@@ -107,12 +104,29 @@ public class BankBranch {
     }
 
     public static void withdraw() {
-        System.out.println("Qual o número da conta que deseja sacar?");
-        int accountNumber = input.nextInt();
+        boolean restart = true;
+        Account account = null;
+        Double value = 0.0;
+        String balanceOld;
 
-        Account account = getAccount(accountNumber);
+        while(restart) {
+            try {
+                System.out.println("Qual o número da conta que deseja sacar?");
+                int accountNumber = input.nextInt();
 
-        if(account == null) {
+                account = getAccount(accountNumber);
+                restart = false;
+            } catch(InputMismatchException err) {
+                System.out.println("-----------------------------------------------------------");
+                System.out.println("[ATENÇÃO]  Entrada inválida. Digite apenas números inteiros. ");
+                System.out.println("-----------------------------------------------------------\n");
+                input.next();
+            }
+        }
+
+        restart = true;
+
+        if (account == null) {
             System.out.println("-----------------------------------------------------------");
             System.out.println("[ATENÇÃO] Número da conta não existe. Tente novamente!");
             System.out.println("-----------------------------------------------------------");
@@ -120,18 +134,29 @@ public class BankBranch {
             deposit();
         }
 
-        System.out.println("Qual valor deseja sacar?");
-        Double value = input.nextDouble();
+        while(restart) {
+            try {
+                System.out.println("Qual valor deseja sacar?");
+                value = input.nextDouble();
+                restart = false;
+            } catch(InputMismatchException err) {
+                System.out.println("-----------------------------------------------------------");
+                System.out.println("[ATENÇÃO] Número da conta não existe. Tente novamente!");
+                System.out.println("-----------------------------------------------------------");
+            }
+        }
 
-        if(value <= 0) {
+        restart = true;
+
+        if (value <= 0) {
             System.out.println("Valor inválido!");
         }
 
-        String balanceOld = Utils.doubleToString(account.getBalance());
+        balanceOld = Utils.doubleToString(account.getBalance());
         account.setBalance(account.getBalance() - value);
 
         System.out.println("-----------------------------------------------------------");
-        System.out.println("Saque de " + Utils.doubleToString(value)  + " efetuado com sucesso!\n"  +
+        System.out.println("Saque de " + Utils.doubleToString(value) + " efetuado com sucesso!\n" +
                 "Para: " + account.getPerson().getName() +
                 "\nSaldo anterior: " + balanceOld +
                 "\nNovo saldo: " + Utils.doubleToString(account.getBalance()));
@@ -141,28 +166,64 @@ public class BankBranch {
     }
 
     public static void transfer() {
-        System.out.println("Qual o número da conta de origem?");
-        int accountNumberOrigin = input.nextInt();
+        boolean restart = true;
+        int accountNumberOrigin = 0;
+        int accountNumberDestination = 0;
+        double value = 0;
 
-        System.out.println("Qual o número da conta de destino?");
-        int accountNumberDestination = input.nextInt();
+        while(restart) {
+            try {
+                System.out.println("Qual o número da conta de origem?");
+                accountNumberOrigin = input.nextInt();
+                restart = false;
+            } catch (InputMismatchException err) {
+                System.out.println("-----------------------------------------------------------");
+                System.out.println("[ATENÇÃO]  Entrada inválida. Digite apenas números inteiros. ");
+                System.out.println("-----------------------------------------------------------\n");
+                input.next();
+            }
+
+        }
+
+        while(restart) {
+            try {
+                System.out.println("Qual o número da conta de destino?");
+                accountNumberDestination = input.nextInt();
+                restart = false;
+            } catch (InputMismatchException err) {
+                System.out.println("-----------------------------------------------------------");
+                System.out.println("[ATENÇÃO]  Entrada inválida. Digite apenas números inteiros. ");
+                System.out.println("-----------------------------------------------------------\n");
+                input.next();
+            }
+        }
 
         Account accountOrigin = getAccount(accountNumberOrigin);
         Account accountDestination = getAccount(accountNumberDestination);
 
         if(accountOrigin == null || accountDestination == null) {
-            System.out.println("-----------------------------------------------------------");
-            System.out.println("[ATENÇÃO] Uma das contas não existe! Vamos tentar novamente?");
-            System.out.println("-----------------------------------------------------------\n");
-
-            transfer();
+            throw new RuntimeException("Uma das contas não existe!");
         }
 
-        System.out.println("Qual valor deseja depositar?");
-        Double value = input.nextDouble();
+        while(restart) {
+            try {
+                System.out.println("Qual valor deseja depositar?");
+                value = input.nextDouble();
+                restart = false;
+            } catch (InputMismatchException err) {
+                System.out.println("-----------------------------------------------------------");
+                System.out.println("[ATENÇÃO]  Entrada inválida. Digite valores em real. ");
+                System.out.println("-----------------------------------------------------------\n");
+                input.next();
+            }
+        }
 
         if(value <= 0) {
-            System.out.println("Valor inválido!");
+            throw new IllegalArgumentException("Valor inválido!");
+        }
+
+        if(accountOrigin.getBalance() < value) {
+            throw new RuntimeException("Saldo insuficiente na conta de origem.");
         }
 
         accountOrigin.setBalance(accountOrigin.getBalance() - value);
@@ -178,8 +239,6 @@ public class BankBranch {
                 "\nSaldo origem: " + balanceOrigin +
                 "\nSaldo destino: " + balanceDestination);
         System.out.println("-----------------------------------------------------------");
-
-        operations();
     }
 
     public static void accountList() {
@@ -196,21 +255,35 @@ public class BankBranch {
         for(int i = 0; i < accounts.size(); i++) {
             Account account = accounts.get(i);
             System.out.println(
-                    "\n" + (i + 1) + "° conta" +
-                            "\nNome: " + account.getPerson().getName() +
-                            "\nNúmero da conta: " + account.getAccountNumber()
+                    "\n| " + (i + 1) + "° conta |" +
+                            account.getAllData()
 
             );
-
         }
-        System.out.println("-----------------------------------------------------------");
+        System.out.println("\n-----------------------------------------------------------");
 
         operations();
     }
 
     public static void deposit() {
-        System.out.println("Qual o número da conta de destino?");
-        int accountNumber = input.nextInt();
+        boolean restart = true;
+        int accountNumber = 0;
+        double value = 0;
+
+        while(restart) {
+            try {
+                System.out.println("Qual o número da conta de destino?");
+                accountNumber = input.nextInt();
+
+                restart = false;
+            } catch (InputMismatchException err) {
+                System.out.println("-----------------------------------------------------------");
+                System.out.println("[ATENÇÃO]  Entrada inválida. Digite apenas números inteiros. ");
+                System.out.println("-----------------------------------------------------------\n");
+                input.next();
+            }
+        }
+
 
         Account account = getAccount(accountNumber);
 
@@ -221,30 +294,90 @@ public class BankBranch {
 
             deposit();
         }
+        System.out.println("-----------------------------------------------------------");
+        System.out.println("Tipo de conta:");
+        System.out.println("[1] Corrente");
+        System.out.println("[2] Poupança");
+        System.out.println("-----------------------------------------------------------");
+        int accountType = input.nextInt();
 
-        System.out.println("Qual valor deseja depositar?");
-        Double value = input.nextDouble();
+        while(restart) {
+            try {
+                System.out.println("Qual valor deseja depositar?");
+                value = input.nextDouble();
+
+                restart = false;
+            } catch (InputMismatchException err) {
+                System.out.println("-----------------------------------------------------------");
+                System.out.println("[ATENÇÃO]  Entrada inválida. Digite apenas valores em real. ");
+                System.out.println("-----------------------------------------------------------\n");
+                input.next();
+            }
+        }
 
         if(value <= 0) {
             System.out.println("Valor inválido!");
         }
 
-        String balanceOld = Utils.doubleToString(account.getBalance());
-        account.setBalance(account.getBalance() + value);
+        switch (accountType) {
+            case 1:
+                String balanceOld = Utils.doubleToString(account.getBalance());
+                account.setBalance(account.getBalance() + value);
 
-        System.out.println("-----------------------------------------------------------");
-        System.out.println("Deposito de " + Utils.doubleToString(value)  + " efetuado com sucesso!\n"  +
-                "Para: " + account.getPerson().getName() +
-                "\nSaldo anterior: " + balanceOld +
-                "\nNovo saldo: " + Utils.doubleToString(account.getBalance()));
-        System.out.println("-----------------------------------------------------------");
+                System.out.println("-----------------------------------------------------------");
+                System.out.println("Deposito de " + Utils.doubleToString(value)  + " efetuado com sucesso!\n"  +
+                        "\nConta: Corrente" +
+                        "\nPara: " + account.getPerson().getName() +
+                        "\nSaldo anterior: " + balanceOld +
+                        "\nNovo saldo: " + Utils.doubleToString(account.getBalance()));
+                System.out.println("-----------------------------------------------------------");
+                break;
+            case 2:
+                String savingsbalanceOld = Utils.doubleToString(account.getSavingsBalance());
+                account.setSavingsBalance(account.getSavingsBalance() + value);
+
+                System.out.println("-----------------------------------------------------------");
+                System.out.println("Deposito de " + Utils.doubleToString(value)  + " efetuado com sucesso!\n"  +
+                        "\nConta: Poupança" +
+                        "\nPara: " + account.getPerson().getName() +
+                        "\nSaldo anterior: " + savingsbalanceOld +
+                        "\nNovo saldo: " + Utils.doubleToString(account.getSavingsBalance()));
+                System.out.println("-----------------------------------------------------------");
+                break;
+            default:
+                String balanceOldDefault = Utils.doubleToString(account.getBalance());
+                account.setBalance(account.getBalance() + value);
+
+                System.out.println("-----------------------------------------------------------");
+                System.out.println("--- [ATENÇÃO] CONTA CORRENTE SELECIONADA AUTOMATICAMENTE---");
+                System.out.println("-----------------------------------------------------------");
+                System.out.println("Deposito de " + Utils.doubleToString(value)  + " efetuado com sucesso!\n"  +
+                        "\nConta: Corrente" +
+                        "\nPara: " + account.getPerson().getName() +
+                        "\nSaldo anterior: " + balanceOldDefault +
+                        "\nNovo saldo: " + Utils.doubleToString(account.getBalance()));
+                System.out.println("-----------------------------------------------------------");
+                break;
+        }
 
         operations();
     }
 
     public static void deleteAccount() {
-        System.out.println("Qual o número da conta que deve ser deletada?");
-        int accountNumber = input.nextInt();
+        boolean restart = true;
+        int accountNumber = 0;
+
+        while(restart) {
+            try {
+                System.out.println("Qual o número da conta que deve ser deletada?");
+                accountNumber = input.nextInt();
+            } catch (InputMismatchException err) {
+                System.out.println("-----------------------------------------------------------");
+                System.out.println("[ATENÇÃO]  Entrada inválida. Digite apenas números inteiros. ");
+                System.out.println("-----------------------------------------------------------\n");
+                input.next();
+            }
+        }
 
         Account account = getAccount(accountNumber);
 
@@ -284,5 +417,4 @@ public class BankBranch {
 
         return account;
     }
-
 }
